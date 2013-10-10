@@ -44,6 +44,9 @@ Vagrant::Config.run do |config|
         "echo '\"vagrant reload\" can be used in about 2 minutes to activate the new guest additions.'; "
     end
     
+    # Add to vagrant user to docker group 
+    pkg_cmd << "adduser vagrant docker;"
+
     # Activate new kernel
     pkg_cmd << "shutdown -r +1; "
     config.vm.provision :shell, :inline => pkg_cmd
@@ -83,6 +86,7 @@ Vagrant::VERSION >= "1.1.0" and Vagrant.configure("2") do |config|
   config.vm.provider :virtualbox do |vb|
     config.vm.box = BOX_NAME
     config.vm.box_url = BOX_URI
+    vb.customize ["modifyvm", :id, "--memory", 2048]
   end
 end
 

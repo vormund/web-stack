@@ -1,3 +1,9 @@
+readme.html
+
+bower_components
+node_modules
+build
+
 *.class
 
 # Package Files #
