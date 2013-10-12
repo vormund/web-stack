@@ -26,7 +26,13 @@ Vagrant::Config.run do |config|
     
     # Add Ubuntu raring backported kernel
     pkg_cmd << "apt-get update -qq; apt-get install -q -y linux-image-generic-lts-raring; "
+
+    # Add everything else
+    pkg_cmd << "apt-get install -q -y vim;"
     
+    # Add to vagrant user to docker group
+    pkg_cmd << "adduser vagrant docker;"
+
     # Add guest additions if local vbox VM. As virtualbox is the default provider,
     # it is assumed it won't be explicitly stated.
     if ENV["VAGRANT_DEFAULT_PROVIDER"].nil? && ARGV.none? { |arg| arg.downcase.start_with?("--provider") }
@@ -44,9 +50,6 @@ Vagrant::Config.run do |config|
         "echo '\"vagrant reload\" can be used in about 2 minutes to activate the new guest additions.'; "
     end
     
-    # Add to vagrant user to docker group 
-    pkg_cmd << "adduser vagrant docker;"
-
     # Activate new kernel
     pkg_cmd << "shutdown -r +1; "
     config.vm.provision :shell, :inline => pkg_cmd
