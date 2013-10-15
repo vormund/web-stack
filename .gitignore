@@ -14,4 +14,4 @@ build
 id_rsa
 id_rsa.pub
 
-jenkins/
+/jenkins
