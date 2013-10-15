@@ -10,3 +10,8 @@ build
 *.jar
 *.war
 *.ear
+
+id_rsa
+id_rsa.pub
+
+jenkins/

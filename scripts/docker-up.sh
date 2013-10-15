@@ -1,5 +1,7 @@
 #!/bin/bash
 
+cp /vagrant/id_rsa ~/.ssh/id_rsa
+
 # Build AS7 container
 cd /vagrant/docker/as7
 docker build -t="as7" .

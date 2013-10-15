@@ -8,12 +8,12 @@ sleep 30 # Wait for box to reboot after vagrant up is finished
 
 while [ ! `vagrant ssh --command "pgrep -f VBoxService"` ]; do
     sleep 5
-    echo "Not found.."
+    echo "Waiting.."
 done
 
 vagrant reload
 
-echo "-----> Building docker container"
+echo "-----> Building docker containers"
 vagrant ssh --command "/bin/bash /vagrant/scripts/docker-up.sh"
 
 echo "Done!"

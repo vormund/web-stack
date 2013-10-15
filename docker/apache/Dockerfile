@@ -5,7 +5,17 @@ RUN echo 'deb http://archive.ubuntu.com/ubuntu precise main universe' > /etc/apt
 RUN apt-get update
 
 # Essentials
-RUN apt-get install -y -q curl git vim aptitude wget openssh-server
+RUN apt-get install -y -q git vim aptitude wget
+
+# Setup SSH Server
+RUN apt-get install -y openssh-server
+RUN mkdir -p /var/run/sshd
+RUN mkdir -p /root/.ssh
+ADD id_rsa.pub /root/.ssh/authorized_keys
+RUN chmod 600 /root/.ssh/authorized_keys
+RUN chown root:root /root/.ssh/authorized_keys
+RUN echo 'AuthorizedKeysFile   /root/.ssh/authorized_keys' > /etc/ssh/sshd_config
+RUN echo 'PermitRootLogin without-password' > /etc/ssh/sshd_config
 
 # Setup Apache
 RUN apt-get -y install libapache2-mod-jk
