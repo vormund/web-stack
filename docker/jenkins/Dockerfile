@@ -16,7 +16,7 @@ RUN mkdir -p /root/.ssh
 ADD id_rsa.pub /root/.ssh/authorized_keys
 RUN chmod 600 /root/.ssh/authorized_keys
 RUN chown root:root /root/.ssh/authorized_keys
-RUN echo 'AuthorizedKeysFile   /root/.ssh/authorized_keys' > /etc/ssh/sshd_config
+RUN echo 'AuthorizedKeysFile /root/.ssh/authorized_keys' > /etc/ssh/sshd_config
 RUN echo 'PermitRootLogin without-password' > /etc/ssh/sshd_config
 
 # Setup Jenkins
