@@ -84,8 +84,8 @@ class CommandInterpreter(object):
         method = getattr(self, args.operation)
         method(args)        
 
-class VagrantCommandInterpreter(CommandInterpreter):
-    """ Command interpreter for Vagrant related tasks """
+class StackCommandInterpreter(CommandInterpreter):
+    """ Command interpreter for Stack related tasks """
 
     def up(self, args):
         self.vagrant.up()
