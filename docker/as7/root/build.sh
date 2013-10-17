@@ -1,31 +1,44 @@
 #!/bin/bash
-#title           :jboss-install.sh
-#description     :The script to install JBoss AS 7.x
-#author          :Dmitriy Sukharev
-#date            :20130106
-#usage           :/bin/bash jboss-install.sh
 
+cd /root
+
+echo 'deb http://archive.ubuntu.com/ubuntu precise main universe' > /etc/apt/sources.list
+apt-get update
+
+# Setup Supervisor
+apt-get install -y wget supervisor
+cp /root/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+
+# Setup SSH Server
+apt-get install -y openssh-server
+mkdir -p /var/run/sshd
+mkdir -p /root/.ssh
+cp id_rsa.pub .ssh/authorized_keys
+chmod 600 .ssh/authorized_keys
+chown root:root -R /root
+echo 'AuthorizedKeysFile /root/.ssh/authorized_keys' >> /etc/ssh/sshd_config
+echo 'PermitRootLogin without-password' >> /etc/ssh/sshd_config
+
+# http://www.webupd8.org/2012/01/install-oracle-java-jdk-7-in-ubuntu-via.html
+# Setup Oracle Java
+apt-get install -y python-software-properties
+add-apt-repository -y ppa:webupd8team/java
+apt-get update
+echo debconf shared/accepted-oracle-license-v1-1 select true | debconf-set-selections
+echo debconf shared/accepted-oracle-license-v1-1 seen true | debconf-set-selections
+apt-get install -y oracle-java7-installer oracle-java7-set-default
+
+# Setup JBoss Application Server 7
 JBOSS_AS_FILENAME=jboss-as-7.1.1.Final
 JBOSS_AS_ARCHIVE_NAME=$JBOSS_AS_FILENAME.tar.gz 
 JBOSS_AS_DOWNLOAD_ADDRESS=http://download.jboss.org/jbossas/7.1/$JBOSS_AS_FILENAME/$JBOSS_AS_ARCHIVE_NAME
-
-INSTALL_DIR=/opt
 JBOSS_AS_FULL_DIR=$INSTALL_DIR/$JBOSS_AS_FILENAME
 JBOSS_AS_DIR=$INSTALL_DIR/jboss-as
-
-JBOSS_AS_USER="jboss-as"
-JBOSS_AS_SERVICE="jboss-as"
-
+JBOSS_AS_USER="jboss"
 JBOSS_AS_STARTUP_TIMEOUT=240
 
+INSTALL_DIR=/opt
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-
-echo "Cleaning up..."
-rm "$JBOSS_AS_ARCHIVE_NAME"
-rm "$JBOSS_AS_DIR"
-rm -r "$JBOSS_AS_FULL_DIR"
-rm -r "/var/run/$JBOSS_AS_SERVICE/"
-rm /etc/init.d/$JBOSS_AS_SERVICE
 
 echo "Installation..."
 wget $JBOSS_AS_DOWNLOAD_ADDRESS
@@ -37,14 +50,7 @@ chown -R $JBOSS_AS_USER:$JBOSS_AS_USER $JBOSS_AS_DIR
 chown -R $JBOSS_AS_USER:$JBOSS_AS_USER $JBOSS_AS_DIR/
 rm $JBOSS_AS_ARCHIVE_NAME
 
-echo "Registrating JBoss as service..."
-mv /docker/functions /etc/init.d
-#sed -e 's,${JBOSS_AS_USER},'$JBOSS_AS_USER',g; s,${JBOSS_AS_FILENAME},'$JBOSS_AS_FILENAME',g; s,${JBOSS_AS_SERVICE},'$JBOSS_AS_SERVICE',g; s,${JBOSS_AS_DIR},'$JBOSS_AS_DIR',g' $SCRIPT_DIR/jboss-as.template > /etc/init.d/$JBOSS_AS_SERVICE
-#chmod 755 /etc/init.d/$JBOSS_AS_SERVICE
-
 echo "Configurating..."
-sed -i -e 's,/bin/sh,/bin/bash,g' $JBOSS_AS_DIR/bin/init.d/jboss-as-standalone.sh
-#sed -i -e 's,. /etc/init.d/functions,. /lib/lsb/init-functions,g' $JBOSS_AS_DIR/bin/init.d/jboss-as-standalone.sh
 sed -i -e 's,<deployment-scanner path="deployments" relative-to="jboss.server.base.dir" scan-interval="5000"/>,<deployment-scanner path="deployments" relative-to="jboss.server.base.dir" scan-interval="5000" deployment-timeout="'$JBOSS_AS_STARTUP_TIMEOUT'"/>,g' $JBOSS_AS_DIR/standalone/configuration/standalone.xml
 sed -i -e 's,<virtual-server name="default-host" enable-welcome-root="true">,<virtual-server name="default-host" enable-welcome-root="false">,g' $JBOSS_AS_DIR/standalone/configuration/standalone.xml
 sed -i -e 's,<inet-address value="${jboss.bind.address:127.0.0.1}"/>,<any-address/>,g' $JBOSS_AS_DIR/standalone/configuration/standalone.xml

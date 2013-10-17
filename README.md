@@ -3,7 +3,7 @@
 Includes the following technologies, playing together...
 
 ### Underneath
-  - [x] [Vagrant](http://www.vagrantup.com/) + [Docker](https://github.com/dotcloud/docker)
+  - [/] [Vagrant](http://www.vagrantup.com/) + [Docker](https://github.com/dotcloud/docker)
 
 ### Frontend
   - [ ] [NPM](https://npmjs.org/)
@@ -32,24 +32,12 @@ Getting Going
 
 1. Install the [lastest version of VirtualBox](https://www.virtualbox.org/)
 2. Install the [lastest version of Vagrant](http://downloads.vagrantup.com/)
-3. Vagrant setup
+3. Stack setup
 
     Checkout this github repo, open a terminal to it, type:
 
-        $ vagrant up 
+        $ python webstack.py stack up
 
-    Takes a few minutues for VirtualBox tools to become available, required for mounting /vagrant
+    This command will setup a Ubuntu flavored Vagrant box, install Docker, and setup docker containers for all of our services.
 
-        $ vagrant reload
-
-4. Docker setup
-
-    Enter Vagrant box
-
-        $ vagrant ssh
-        $ cd /vagrant
-        $ docker build -t="webstack" .
-
-    After this completes you should have docker container complete with Apache, AS7, MySQL services running
-
-5. Coming Soon..
+4. More to come soon!!

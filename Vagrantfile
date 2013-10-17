@@ -4,7 +4,7 @@
 BOX_NAME = ENV['BOX_NAME'] || "ubuntu"
 BOX_URI = ENV['BOX_URI'] || "http://files.vagrantup.com/precise64.box"
 VF_BOX_URI = ENV['BOX_URI'] || "http://files.vagrantup.com/precise64_vmware_fusion.box"
-AWS_REGION = ENV['AWS_REGION'] || "us-east-1"
+AWS_REGION = ENV['AWS_REGION'] || "us-west-1"
 AWS_AMI    = ENV['AWS_AMI']    || "ami-d0f89fb9"
 FORWARD_DOCKER_PORTS = ENV['FORWARD_DOCKER_PORTS']
 
@@ -12,6 +12,11 @@ Vagrant::Config.run do |config|
   # Setup virtual machine box. This VM configuration code is always executed.
   config.vm.box = BOX_NAME
   config.vm.box_url = BOX_URI
+  #config.vm.network :bridged
+  #config.vm.network "public_network", :bridge => 'en1: Wi-Fi (AirPort)'
+  #config.vm.forward_port 5000, 5010
+  config.vm.forward_port 1234, 1234
+  config.vm.forward_port 8080, 8080
 
   config.ssh.forward_agent = true
 
@@ -28,7 +33,7 @@ Vagrant::Config.run do |config|
     pkg_cmd << "apt-get update -qq; apt-get install -q -y linux-image-generic-lts-raring; "
 
     # Add everything else
-    pkg_cmd << "apt-get install -q -y vim;"
+    pkg_cmd << "apt-get install -q -y vim python-pip; pip install --upgrade setuptools;"
     
     # Add to vagrant user to docker group
     pkg_cmd << "adduser vagrant docker;"
@@ -53,6 +58,7 @@ Vagrant::Config.run do |config|
     # Activate new kernel
     pkg_cmd << "shutdown -r +1; "
     config.vm.provision :shell, :inline => pkg_cmd
+
   end
 end
 
