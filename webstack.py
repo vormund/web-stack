@@ -54,7 +54,7 @@ class VagrantWrapper(object):
 
         self.vagrant('reload')
 
-    def destroy(self, args):
+    def destroy(self):
         self.vagrant('destroy')
 
 class DockerWrapper(object):
@@ -64,9 +64,13 @@ class DockerWrapper(object):
 
     def build(self, dockers):
         for docker in dockers:
-            # Copy our public key to docker directory to propegate inside our containers
-            shutil.copy(os.path.expanduser("~") + '/.ssh/id_rsa.pub', 'docker/%s' % docker)
 
+            if not os.path.isdir('docker/%s' % docker):
+                continue;
+
+            # Copy our public key to docker directory to propegate inside our containers
+            shutil.copy(os.path.expanduser("~") + '/.ssh/id_rsa.pub', 'docker/%s/root' % docker)
+ 
             run('vagrant ssh --command "cd %s/%s && docker build -t=\"%s\" ."' % (self.baseDir, docker, docker), cwd="docker/%s" % docker)
 
 
@@ -91,7 +95,7 @@ class StackCommandInterpreter(CommandInterpreter):
         self.vagrant.up()
 
         # Get a list of docker containers that we want to initialize after vagrant comes up        
-        dockerDirs = list(set(args.docker) & set(os.listdir('docker'))) if len(args.docker) > 0 else os.listdir('docker')        
+        dockerDirs = list(set(args.docker) & set(os.listdir('docker'))) if len(args.docker) > 0 else os.listdir('docker')
         self.docker.build(dockerDirs)
 
     def destroy(self, args):
