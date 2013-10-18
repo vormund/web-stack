@@ -1,3 +1,2 @@
 FROM    samalba/docker-registry
-
-EXPOSE 5000
+EXPOSE  5000

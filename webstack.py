@@ -98,7 +98,7 @@ class StackCommandInterpreter(CommandInterpreter):
         dockerDirs = list(set(args.docker) & set(os.listdir('docker'))) if len(args.docker) > 0 else os.listdir('docker')
         self.docker.build(dockerDirs)
 
-    def destroy(self, args):
+    def down(self, args):
         self.vagrant.destroy()
 
 class DockerCommandInterpreter(CommandInterpreter):
@@ -120,16 +120,19 @@ moduleSubparsers = parser.add_subparsers(dest='module', help='Module help')
 stackParser = moduleSubparsers.add_parser('stack', help='Stack related commands')
 dockerParser = moduleSubparsers.add_parser('docker', help='Docker related commands')
 
-## Module - Vagrant
-vagrantSubparsers = stackParser.add_subparsers(dest='operation', help='Vagrant operations help')
+## Module - Stack
+stackSubparsers = stackParser.add_subparsers(dest='operation', help='Stack operations')
 
 # Stack - up
-upParser = vagrantSubparsers.add_parser('up', help='Setup')
-upParser.add_argument('docker', type=str, nargs='*', help='Docker container names')
+upParser = stackSubparsers.add_parser('up', help='Setup')
+upParser.add_argument('docker', type=str, nargs='*', help='Docker container names, omit for all')
 
-# Stack - destroy
-downParser = vagrantSubparsers.add_parser('destroy', help='Teardown')
-#downParser.add_argument('bar', type=int, help='bar help')
+# Stack - down
+downParser = stackSubparsers.add_parser('down', help='Teardown')
+
+# Stack - create
+createParser = stackSubparsers.add_parser('create', help='Create containers')
+createParser.add_argument('docker', type=str, nargs='*', help='Docker container names, omit for all')
 
 ## Module - Docker
 dockerSubparsers = dockerParser.add_subparsers(dest='operation', help='Docker operations help')

@@ -14,4 +14,7 @@ build
 id_rsa
 id_rsa.pub
 
-/jenkins
+/docker/jenkins/jenkins
+/docker/apache2/var
+/docker/apache2/etc
+/docker/wildfly/opt

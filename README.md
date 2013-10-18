@@ -16,7 +16,7 @@ Includes the following technologies, playing together...
 
 ### Backend - Java
   - [ ] [Apache 2](http://www.apache.org/) + [mod-jk](http://tomcat.apache.org/connectors-doc/)
-  - [ ] [Application Server 7](https://www.jboss.org/jbossas)
+  - [ ] [WildFly](https://www.wildfly.org)
   - [ ] [Maven](http://maven.apache.org/)
   - [ ] [Hibernate](http://www.hibernate.org/)
   - [ ] [MySQL](http://www.mysql.com/)

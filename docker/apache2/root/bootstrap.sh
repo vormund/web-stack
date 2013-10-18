@@ -7,4 +7,4 @@ export APACHE_RUN_DIR=/var/run/apache2$SUFFIX
 export APACHE_PID_FILE=/var/run/apache2$SUFFIX.pid
 export APACHE_LOCK_DIR=/var/lock/apache2$SUFFIX
 
-/usr/bin/supervisord
+/usr/local/bin/supervisord -c /etc/supervisord.conf

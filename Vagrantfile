@@ -17,6 +17,17 @@ Vagrant::Config.run do |config|
   #config.vm.forward_port 5000, 5010
   config.vm.forward_port 1234, 1234
   config.vm.forward_port 8080, 8080
+  config.vm.forward_port 8080, 9000
+
+  # Forward SSH ports into docker containers
+  (2200..2210).each do |port|
+    config.vm.forward_port port, port
+  end
+
+  # Forward Supervisor ports
+  (9000..9010).each do |port|
+    config.vm.forward_port port, port
+  end
 
   config.ssh.forward_agent = true
 
