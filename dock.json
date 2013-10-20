@@ -1,0 +1,41 @@
+{
+    "docks": {
+        "web": {
+            "images": [
+                {
+                    "image": "apache2",
+                    "ports": [
+                        {
+                            "source":"22",
+                            "expose":"2201"
+                        },
+                        {
+                            "source":"80",
+                            "expose":"80"
+                        },
+                        {
+                            "source":"443",
+                            "expose":"443"
+                        }
+
+                    ]
+                },
+                {
+                    "image": "mysql",
+                    "ports": [
+                        {
+                            "source":"443",
+                            "expose":"443"
+                        }                
+                    ]
+                },
+                {    
+                    "image": "wildfly",
+                    "ports": {}
+                }
+            ]
+        },
+        "jenkins": {},
+        "docker": {}
+    }
+}
