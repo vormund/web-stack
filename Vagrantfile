@@ -15,6 +15,7 @@ Vagrant::Config.run do |config|
   #config.vm.network :bridged
   #config.vm.network "public_network", :bridge => 'en1: Wi-Fi (AirPort)'
   #config.vm.forward_port 5000, 5010
+  config.vm.forward_port 5555, 5555
   config.vm.forward_port 1234, 1234
   config.vm.forward_port 8080, 8080
   config.vm.forward_port 8080, 9000
