@@ -3,7 +3,7 @@
 Includes the following technologies, playing together...
 
 ### Underneath
-  - [/] [Vagrant](http://www.vagrantup.com/) + [Docker](https://github.com/dotcloud/docker)
+  - [✓] [Vagrant](http://www.vagrantup.com/) + [Docker](https://github.com/dotcloud/docker)
 
 ### Frontend
   - [ ] [NPM](https://npmjs.org/)
@@ -19,19 +19,27 @@ Includes the following technologies, playing together...
   - [ ] [WildFly](https://www.wildfly.org)
   - [ ] [Maven](http://maven.apache.org/)
   - [ ] [Hibernate](http://www.hibernate.org/)
-  - [ ] [MySQL](http://www.mysql.com/)
+  - [ ] [MySQL](http://www.mysql.com/) or [PostgreSQL](http://www.postgresql.org/)
   - [ ] [RestEasy](http://www.jboss.org/resteasy) + [Skeleton Key (OAuth2)](http://docs.jboss.org/resteasy/docs/3.0-beta-2/userguide/html/oauth2.html)
   - [ ] [Arquillian](http://arquillian.org/)
 
 ### Extra
+  - [ ] [RHQ](http://www.jboss.org/rhq)
   - [ ] [Webmin](http://www.webmin.com/)
 
 
 Getting Going
 ----------------
+1. [Lastest version of VirtualBox](https://www.virtualbox.org/)
+2. [Lastest version of Vagrant](http://downloads.vagrantup.com/)
+3. Python 2.7 requirements
 
-1. Install the [lastest version of VirtualBox](https://www.virtualbox.org/)
-2. Install the [lastest version of Vagrant](http://downloads.vagrantup.com/)
+    [Download SetupTools](https://pypi.python.org/pypi/setuptools)
+        
+        $ sudo python setup.py install    
+        $ sudo easy_install docker-py
+        $ sudo easy_install python-vagrant
+
 3. Stack setup
 
     Checkout this github repo, open a terminal to it, type:
