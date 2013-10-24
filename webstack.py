@@ -166,20 +166,6 @@ class StackCommandInterpreter(CommandInterpreter):
     def down(self, args):
         self.vagrant.destroy()
 
-    def build(self, args):
-
-        # Compile a list of valid dockers to build
-        dockers = []
-        if 'all' in args.docker:
-            dockers = os.listdir('docker')
-        else:
-            dockers = list(set(args.docker) & set(os.listdir('docker')))
-            dockers = filter(lambda x: os.path.isdir('docker/' + x), dockers)
-
-        # Get a list of docker containers that we want to initialize after vagrant comes up        
-        for docker in dockers:
-            self.docker.build(docker)
-
     def dock(self, args):
 
         dockConfig = json.load(open('dock.json'))
@@ -201,9 +187,18 @@ class DockerCommandInterpreter(CommandInterpreter):
     """ Command interpreter for Docker related tasks """
 
     def build(self, args):
+
+        # Compile a list of valid dockers to build
+        dockers = []
+        if 'all' in args.docker:
+            dockers = os.listdir('docker')
+        else:
+            dockers = list(set(args.docker) & set(os.listdir('docker')))
+            dockers = filter(lambda x: os.path.isdir('docker/' + x), dockers)
+
         # Get a list of docker containers that we want to initialize after vagrant comes up        
-        dockerDirs = list(set(args.docker) & set(os.listdir('docker'))) if len(args.docker) > 0 else os.listdir('docker')
-        self.docker.build(dockerDirs)
+        for docker in dockers:
+            self.docker.build(docker)
 
     def kill(self, args):        
         for container in args.container:
@@ -211,7 +206,7 @@ class DockerCommandInterpreter(CommandInterpreter):
 
     def command(self, args):
         print args
-        run('vagrant ssh --command "docker %s"' % (' '.join(args.arg)), cwd="docker/wildfly")
+        run('vagrant ssh --command "docker %s"' % (' '.join(args.arg)))
 
     def image(self, args):
         if args.action == 'list':
@@ -255,12 +250,11 @@ parser = stackSubparsers.add_parser('up', help='Create Vagrant VM, build Docker 
 # Stack - down
 parser = stackSubparsers.add_parser('down', help='Destroy Vagrant VM')
 
-# Stack - build
-parser = stackSubparsers.add_parser('build', help='Build/Rebuild Docker containers')
-parser.add_argument('docker', type=str, nargs='+', help='Docker container names, \'all\' for all')
-
 # Stack - 
-parser = stackSubparsers.add_parser('dock', help='Dock containers')
+parser = stackSubparsers.add_parser('start', help='Start a dock configuration')
+parser.add_argument('configuration', type=str, nargs='+', help='Dock configuration')
+
+parser = stackSubparsers.add_parser('stop', help='Stop a dock configuration')
 parser.add_argument('configuration', type=str, nargs='+', help='Dock configuration')
 
 ## Module - Docker
