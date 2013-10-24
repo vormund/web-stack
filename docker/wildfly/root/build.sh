@@ -6,9 +6,10 @@ echo 'deb http://archive.ubuntu.com/ubuntu precise main universe' > /etc/apt/sou
 apt-get update
 
 # Setup Essentials
-apt-get install -y wget vim python-setuptools
+apt-get install -y wget vim python-setuptools net-tools
 
 # Setup Supervisor
+apt-get install -y python-setuptools
 easy_install supervisor
 mv /root/supervisord.conf /etc
 

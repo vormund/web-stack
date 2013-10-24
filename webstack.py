@@ -1,6 +1,6 @@
 #!/usr/bin/python
-import argparse, subprocess, re, sys, os, shutil, time
-import docker
+import argparse, subprocess, re, sys, os, shutil, time, json
+import docker, vagrant
 from lib.dict2table import *
 
 VERSION="0.1";
@@ -137,11 +137,31 @@ class StackCommandInterpreter(CommandInterpreter):
     """ Command interpreter for Stack related tasks """
 
     def up(self, args):
-        self.vagrant.up()
+        
+        # Bring Vagrant UP
+        v = vagrant.Vagrant()
+        if not v.status()['default'] == 'running':
+            self.vagrant.up()
 
-        # Get a list of docker containers that we want to initialize after vagrant comes up        
-        dockerDirs = list(set(args.docker) & set(os.listdir('docker'))) if len(args.docker) > 0 else os.listdir('docker')
-        self.docker.build(dockerDirs)
+        # Verify Vagrant is UP
+        i = 0
+        while not v.status()['default'] == 'running':
+            print "waiting for Vagrant box.."
+            time.sleep(1)
+            i = i + 1
+            if i > 5:
+                print "Something went wrong, Vagrant box is still not up."
+                sys.exit(1)
+
+        # Get a list of the docker containers we have built already
+        dockerDirs = filter(lambda x: os.path.isdir('docker/' + x), os.listdir('docker'))
+        imagesBuilt = [] 
+        for imageInfo in self.docker.client.images():
+            imagesBuilt.append(imageInfo['Repository'])
+
+        # Build docker containers
+        for dockerName in list(set(dockerDirs) - set(imagesBuilt)):
+            self.docker.build(dockerName)
 
     def down(self, args):
         self.vagrant.destroy()
@@ -159,6 +179,23 @@ class StackCommandInterpreter(CommandInterpreter):
         # Get a list of docker containers that we want to initialize after vagrant comes up        
         for docker in dockers:
             self.docker.build(docker)
+
+    def dock(self, args):
+
+        dockConfig = json.load(open('dock.json'))
+
+        for dockName in args.configuration:
+            if not dockConfig['docks'].get(dockName):
+                print 'No such dock configuration [%s] found.' % dockName
+                sys.exit(1)
+    
+            run('vagrant ssh --command "python /vagrant/scripts/dns.py %s"' % dockName)
+
+            # f = open('','w')
+            # f.write('')
+            # f.close()
+
+            #dock
 
 class DockerCommandInterpreter(CommandInterpreter):
     """ Command interpreter for Docker related tasks """
@@ -214,7 +251,6 @@ stackSubparsers = stackParser.add_subparsers(dest='operation', help='Stack opera
 
 # Stack - up
 parser = stackSubparsers.add_parser('up', help='Create Vagrant VM, build Docker containers')
-parser.add_argument('docker', type=str, nargs='+', help='Docker container names, \'all\' for all')
 
 # Stack - down
 parser = stackSubparsers.add_parser('down', help='Destroy Vagrant VM')
@@ -224,8 +260,8 @@ parser = stackSubparsers.add_parser('build', help='Build/Rebuild Docker containe
 parser.add_argument('docker', type=str, nargs='+', help='Docker container names, \'all\' for all')
 
 # Stack - 
-parser = stackSubparsers.add_parser('shop', help='Setup shop')
-parser.add_argument('configuration', type=str, nargs='+', help='Shop configuration')
+parser = stackSubparsers.add_parser('dock', help='Dock containers')
+parser.add_argument('configuration', type=str, nargs='+', help='Dock configuration')
 
 ## Module - Docker
 dockerSubparsers = dockerParser.add_subparsers(dest='operation', help='Docker operations help')

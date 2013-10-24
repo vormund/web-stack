@@ -1,37 +1,66 @@
 {
     "docks": {
         "web": {
+            "domain": "webstack.com",
             "images": [
                 {
                     "image": "apache2",
                     "ports": [
                         {
-                            "source":"22",
-                            "expose":"2201"
+                            "private":"22",
+                            "public":"2200"
                         },
                         {
-                            "source":"80",
-                            "expose":"80"
+                            "private":"80",
+                            "public":"80"
                         },
                         {
-                            "source":"443",
-                            "expose":"443"
+                            "private":"443",
+                            "public":"443"
                         }
 
-                    ]
-                },
-                {
-                    "image": "mysql",
-                    "ports": [
-                        {
-                            "source":"443",
-                            "expose":"443"
-                        }                
+                    ],
+                    "dns": [
+                        "172.17.42.1",
+                        "8.8.8.8",
+                        "8.8.4.4"
                     ]
                 },
                 {    
                     "image": "wildfly",
-                    "ports": {}
+                    "ports": [
+                        {
+                            "private":"22",
+                            "public":"2201"
+                        },
+                        {
+                            "private":"8080",
+                            "public":"8080"
+                        }
+                    ],
+                    "dns": [
+                        "172.17.42.1",
+                        "8.8.8.8",
+                        "8.8.4.4"
+                    ]                    
+                },                
+                {
+                    "image": "postgres",
+                    "ports": [
+                        {
+                            "private":"22",
+                            "public":"2202"
+                        },                    
+                        {
+                            "private":"5432",
+                            "public":"5432"
+                        }
+                    ],
+                    "dns": [
+                        "172.17.42.1",
+                        "8.8.8.8",
+                        "8.8.4.4"
+                    ]
                 }
             ]
         },

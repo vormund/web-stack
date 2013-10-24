@@ -19,6 +19,8 @@ Vagrant::Config.run do |config|
   config.vm.forward_port 1234, 1234
   config.vm.forward_port 8080, 8080
   config.vm.forward_port 8080, 9000
+  config.vm.forward_port 5432, 5432
+  config.vm.forward_port 7080, 7080
 
   # Forward SSH ports into docker containers
   (2200..2210).each do |port|
@@ -45,10 +47,11 @@ Vagrant::Config.run do |config|
     pkg_cmd << "apt-get update -qq; apt-get install -q -y linux-image-generic-lts-raring; "
 
     # Add everything else
-    pkg_cmd << "apt-get install -q -y vim python-pip; pip install --upgrade setuptools;"
+    pkg_cmd << "apt-get install -q -y vim python-pip bind9; pip install --upgrade setuptools; pip install docker-py;"
     
-    # Add to vagrant user to docker group
+    # Setup Docker, open API interface on all interfaces
     pkg_cmd << "adduser vagrant docker;"
+    pkg_cmd << "sed -i -e \"s,/usr/bin/docker -d,/usr/bin/docker -d -H 0.0.0.0:5555 -H unix:///var/run/docker.sock,g\" /etc/init/docker.conf;"
 
     # Add guest additions if local vbox VM. As virtualbox is the default provider,
     # it is assumed it won't be explicitly stated.

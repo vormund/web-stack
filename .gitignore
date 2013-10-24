@@ -20,3 +20,4 @@ id_rsa.pub
 /docker/apache2/var
 /docker/apache2/etc
 /docker/wildfly/opt
+/docker/postgres/data
