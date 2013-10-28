@@ -4,11 +4,25 @@
             "domain": "webstack.com",
             "images": [
                 {
-                    "image": "apache2",
+                    "image": "rhq",
                     "ports": [
                         {
                             "private":"22",
                             "public":"2200"
+                        }
+                    ],
+                    "dns": [
+                        "172.17.42.1",
+                        "8.8.8.8",
+                        "8.8.4.4"
+                    ]
+                },
+                {
+                    "image": "apache2",
+                    "ports": [
+                        {
+                            "private":"22",
+                            "public":"2201"
                         },
                         {
                             "private":"80",
@@ -26,24 +40,6 @@
                         "8.8.4.4"
                     ]
                 },
-                {    
-                    "image": "wildfly",
-                    "ports": [
-                        {
-                            "private":"22",
-                            "public":"2201"
-                        },
-                        {
-                            "private":"8080",
-                            "public":"8080"
-                        }
-                    ],
-                    "dns": [
-                        "172.17.42.1",
-                        "8.8.8.8",
-                        "8.8.4.4"
-                    ]                    
-                },                
                 {
                     "image": "postgres",
                     "ports": [
@@ -61,7 +57,27 @@
                         "8.8.8.8",
                         "8.8.4.4"
                     ]
+                },
+                {    
+                    "image": "wildfly",
+                    "instances": 5,
+                    "ports": [
+                        {
+                            "private":"22",
+                            "public":"2205"
+                        },
+                        {
+                            "private":"8080",
+                            "public":"8080"
+                        }
+                    ],
+                    "dns": [
+                        "172.17.42.1",
+                        "8.8.8.8",
+                        "8.8.4.4"
+                    ]                    
                 }
+
             ]
         },
         "jenkins": {},
