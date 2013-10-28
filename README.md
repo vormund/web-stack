@@ -24,7 +24,7 @@ Includes the following technologies, playing together...
   - [ ] [Arquillian](http://arquillian.org/)
 
 ### Extra
-  - [ ] [RHQ](http://www.jboss.org/rhq)
+  - [✓] [RHQ](http://www.jboss.org/rhq)
   - [ ] [Webmin](http://www.webmin.com/)
 
 
