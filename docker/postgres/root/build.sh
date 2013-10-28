@@ -6,7 +6,7 @@ echo 'deb http://archive.ubuntu.com/ubuntu precise main universe' > /etc/apt/sou
 apt-get update
 
 # Setup Essentials
-apt-get install -y wget vim python-software-properties software-properties-common sudo
+apt-get install -y wget vim python-software-properties software-properties-common sudo net-tools inetutils-ping
 
 # Setup Supervisor
 apt-get install -y wget python-setuptools
@@ -30,8 +30,7 @@ apt-get update
 apt-get -y install postgresql-9.2 postgresql-client-9.2 postgresql-contrib-9.2
 
 # Configure PostgreSQL
-sudo -u postgres psql -c "CREATE USER docker WITH PASSWORD 'docker';"
-sudo -u postgres createdb -O docker docker
+sudo -u postgres psql -c "CREATE ROLE docker PASSWORD 'docker' SUPERUSER CREATEDB CREATEROLE INHERIT LOGIN;"
 service stop postgres
 
 mkdir -p /postgres

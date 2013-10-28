@@ -24,28 +24,27 @@ Includes the following technologies, playing together...
   - [ ] [Arquillian](http://arquillian.org/)
 
 ### Extra
-  - [ ] [RHQ](http://www.jboss.org/rhq)
+  - [✓] [RHQ](http://www.jboss.org/rhq)
   - [ ] [Webmin](http://www.webmin.com/)
 
 
 Getting Going
 ----------------
-1. [Lastest version of VirtualBox](https://www.virtualbox.org/)
-2. [Lastest version of Vagrant](http://downloads.vagrantup.com/)
-3. Python 2.7 requirements
 
-    [Download SetupTools](https://pypi.python.org/pypi/setuptools)
+    Windows users can omit the 'sudo' in console commands below.
+
+1. Download & install [lastest version of VirtualBox](https://www.virtualbox.org/)
+2. Download & install [lastest version of Vagrant](http://downloads.vagrantup.com/)
+3. Download & install Python 2.7 (Standard with OSX)
+4. Download & Install [latest version of SetupTools](https://pypi.python.org/pypi/setuptools)
         
         $ sudo python setup.py install    
-        $ sudo easy_install docker-py
-        $ sudo easy_install python-vagrant
+        $ sudo easy_install docker-py python-vagrant
 
-3. Stack setup
-
-    Checkout this github repo, open a terminal to it, type:
+5. Stack setup
 
         $ python webstack.py stack up
 
     This command will setup a Ubuntu flavored Vagrant box, install Docker, and setup docker containers for all of our services.
 
-4. More to come soon!!
+6. More to come soon!!

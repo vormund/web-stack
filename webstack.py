@@ -1,31 +1,11 @@
 #!/usr/bin/python
-import argparse, subprocess, re, sys, os, shutil, time, json
-import docker, vagrant
-from lib.dict2table import *
+import argparse, sys
+import docker
+from lib import *
 
-VERSION="0.1";
-
-def run(cmd, returncode=False, echo=True, **kargs):
-    """ Executes a shell command and prints out STDOUT / STDERROR, exits on failure by default """
-    
-    process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True, **kargs)
-    if echo:
-        print "$ %s" % cmd
-    
-    while True:
-        out = process.stdout.read(1)
-        if out == '' and process.poll() != None:
-            break
-        if out != '':
-            sys.stdout.write(out)
-            sys.stdout.flush()
-
-    if returncode:
-        return process.returncode
-    else:
-        if process.returncode != 0:
-            print "Something went wrong! returncode=%s" % process.returncode
-            sys.exit(1)
+VERSION = '0.1'
+DOCKER_URL = 'http://127.0.0.1:5555'
+DOCKER_API_VERSION = '1.6'
 
 class NoArgHelpParser(argparse.ArgumentParser):
     """ Extend parser to show help screen whene executed with no arguments """
@@ -36,204 +16,6 @@ class NoArgHelpParser(argparse.ArgumentParser):
         sys.exit(2)            
 
 
-class VagrantWrapper(object):
-    """ Small wrapper around some commonly used vagrant operations """
-
-    def vagrant(self, operation):
-        run('vagrant %s' % operation)
-
-    def up(self):
-        self.vagrant('up')
-
-        # Wait for VirtualBox tools to come online
-        if not os.environ.get('VAGRANT_DEFAULT_PROVIDER') or os.environ.get('VAGRANT_DEFAULT_PROVIDER') == 'virtualbox':            
-            # Wait for VirtualBox to restart
-            time.sleep(30)
-
-            while run('vagrant ssh --command "pgrep -f VBoxService"', returncode=True, echo=False):
-                sys.stdout.write(".")
-            print "."
-
-        self.vagrant('reload')
-
-    def destroy(self):
-        self.vagrant('destroy')
-
-class DockerWrapper(object):
-    """ Small wrapper around Docker """
-
-    baseDir = '/vagrant/docker'
-    client = None
-
-    def __init__(self, client=None):
-        self.client = client
-
-    def images(self):
-        #print self.client.images()
-        headers = ['Repository', 'Tag', 'Id']
-        print format_as_table(self.client.images(), headers, headers)
-
-    def build(self, docker):
-
-        if not os.path.isdir('docker/%s' % docker):
-            return
-
-        # Copy our public key to docker directory to propegate inside our containers
-        shutil.copy(os.path.expanduser("~") + '/.ssh/id_rsa.pub', 'docker/%s/root' % docker)
-
-        run('vagrant ssh --command "cd %s/%s && docker build -t=\"%s\" ."' % (self.baseDir, docker, docker), cwd="docker/%s" % docker)
-
-    def ps(self):
-        headers = ['Image', 'Id', 'Status', 'Command']
-        print format_as_table(self.client.containers(), headers, headers)
-
-    def run(self, image):
-        containerInfo = self.client.create_container(image, None)
-        self.client.start(containerInfo['Id'])
-        print "Image [%s] started, container=%s." % (image, containerInfo['Id'])
-
-    def kill(self, containerId):
-        if containerId == 'all':
-            containers = self.client.containers()     
-        else:
-            containers = [{'Id':containerId}]
-
-        for containerInfo in containers:
-            try:
-                self.client.kill(containerInfo['Id'])
-                print "Container [%s] killed." % containerInfo['Id']
-            except:
-                print "Failed killing [%s] container." % containerInfo['Id']
-
-    def removeImage(self, imageId):
-        if imageId == 'all':
-            images = self.client.images()     
-        else:
-            images = [{'Id':imageId}]
-
-        for imageInfo in images:
-            try:
-                self.client.remove_image(imageInfo['Id'])
-                print "Image [%s] removed." % imageInfo['Id']
-            except:
-                print "Failed removing [%s] image." % imageInfo['Id']            
-            
-
-class CommandInterpreter(object):
-
-    vagrant = None
-    docker = None
-
-    def __init__(self, vagrant=None, docker=None):
-        self.vagrant = vagrant
-        self.docker = docker
-
-    def execute(self, args):
-        """ Execute command via reflection """
-        method = getattr(self, args.operation)
-        method(args)        
-
-class StackCommandInterpreter(CommandInterpreter):
-    """ Command interpreter for Stack related tasks """
-
-    def up(self, args):
-        
-        # Bring Vagrant UP
-        v = vagrant.Vagrant()
-        if not v.status()['default'] == 'running':
-            self.vagrant.up()
-
-        # Verify Vagrant is UP
-        i = 0
-        while not v.status()['default'] == 'running':
-            print "waiting for Vagrant box.."
-            time.sleep(1)
-            i = i + 1
-            if i > 5:
-                print "Something went wrong, Vagrant box is still not up."
-                sys.exit(1)
-
-        # Get a list of the docker containers we have built already
-        dockerDirs = filter(lambda x: os.path.isdir('docker/' + x), os.listdir('docker'))
-        imagesBuilt = [] 
-        for imageInfo in self.docker.client.images():
-            imagesBuilt.append(imageInfo['Repository'])
-
-        # Build docker containers
-        for dockerName in list(set(dockerDirs) - set(imagesBuilt)):
-            self.docker.build(dockerName)
-
-    def down(self, args):
-        self.vagrant.destroy()
-
-    def build(self, args):
-
-        # Compile a list of valid dockers to build
-        dockers = []
-        if 'all' in args.docker:
-            dockers = os.listdir('docker')
-        else:
-            dockers = list(set(args.docker) & set(os.listdir('docker')))
-            dockers = filter(lambda x: os.path.isdir('docker/' + x), dockers)
-
-        # Get a list of docker containers that we want to initialize after vagrant comes up        
-        for docker in dockers:
-            self.docker.build(docker)
-
-    def dock(self, args):
-
-        dockConfig = json.load(open('dock.json'))
-
-        for dockName in args.configuration:
-            if not dockConfig['docks'].get(dockName):
-                print 'No such dock configuration [%s] found.' % dockName
-                sys.exit(1)
-    
-            run('vagrant ssh --command "python /vagrant/scripts/dns.py %s"' % dockName)
-
-            # f = open('','w')
-            # f.write('')
-            # f.close()
-
-            #dock
-
-class DockerCommandInterpreter(CommandInterpreter):
-    """ Command interpreter for Docker related tasks """
-
-    def build(self, args):
-        # Get a list of docker containers that we want to initialize after vagrant comes up        
-        dockerDirs = list(set(args.docker) & set(os.listdir('docker'))) if len(args.docker) > 0 else os.listdir('docker')
-        self.docker.build(dockerDirs)
-
-    def kill(self, args):        
-        for container in args.container:
-            self.docker.kill(container)
-
-    def command(self, args):
-        print args
-        run('vagrant ssh --command "docker %s"' % (' '.join(args.arg)), cwd="docker/wildfly")
-
-    def image(self, args):
-        if args.action == 'list':
-            self.docker.images()
-
-        elif args.action == 'remove':
-            for image in args.image:
-                self.docker.removeImage(image)
-
-        elif args.action == 'run':
-            for image in args.image:
-                self.docker.run(image)
-
-    def container(self, args):
-        if args.action == 'list':
-            #self.docker.containers()
-            self.docker.ps()
-
-        elif args.action == 'kill':
-            for container in args.container:
-                self.docker.kill(container)
-        
 ### Parse command-line arguments
 rootParser = NoArgHelpParser(description='''Web-Stack Common Operation Helper''',)
 
@@ -255,12 +37,11 @@ parser = stackSubparsers.add_parser('up', help='Create Vagrant VM, build Docker 
 # Stack - down
 parser = stackSubparsers.add_parser('down', help='Destroy Vagrant VM')
 
-# Stack - build
-parser = stackSubparsers.add_parser('build', help='Build/Rebuild Docker containers')
-parser.add_argument('docker', type=str, nargs='+', help='Docker container names, \'all\' for all')
-
 # Stack - 
-parser = stackSubparsers.add_parser('dock', help='Dock containers')
+parser = stackSubparsers.add_parser('start', help='Start a dock configuration')
+parser.add_argument('configuration', type=str, nargs='+', help='Dock configuration')
+
+parser = stackSubparsers.add_parser('stop', help='Stop a dock configuration')
 parser.add_argument('configuration', type=str, nargs='+', help='Dock configuration')
 
 ## Module - Docker
@@ -327,6 +108,6 @@ if not commandInterpreter:
 # Execute
 commandInterpreter = commandInterpreter( \
     vagrant=VagrantWrapper(), \
-    docker=DockerWrapper(client=docker.Client(base_url='http://127.0.0.1:5555', version="1.6")))
+    docker=DockerWrapper(client=docker.Client(base_url=DOCKER_URL, version=DOCKER_API_VERSION)))
 commandInterpreter.execute(args)
 
