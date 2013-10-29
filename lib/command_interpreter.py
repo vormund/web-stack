@@ -1,14 +1,16 @@
-import os, sys, time, json
+import os, sys, time
 import vagrant
 
 class CommandInterpreter(object):
 
     vagrant = None
     docker = None
+    dockYard = None
 
-    def __init__(self, vagrant=None, docker=None):
+    def __init__(self, vagrant=None, docker=None, dockyard=None):
         self.vagrant = vagrant
         self.docker = docker
+        self.dockyard = dockyard
 
     def execute(self, args):
         """ Execute command via reflection """
@@ -49,21 +51,30 @@ class StackCommandInterpreter(CommandInterpreter):
         self.vagrant.destroy()
 
     def start(self, args):
-
-        dockConfig = json.load(open('dock.json'))
-
         for dockName in args.configuration:
-            if not dockConfig['docks'].get(dockName):
-                print 'No such dock configuration [%s] found.' % dockName
-                sys.exit(1)
+            self.dockyard.start(dockName)
+
+        # dockConfig = json.load(open('dock.json'))
+
+        # for dockName in args.configuration:
+        #     if not dockConfig['docks'].get(dockName):
+        #         print 'No such dock configuration [%s] found.' % dockName
+        #         sys.exit(1)
     
-            run('vagrant ssh --command "python /vagrant/scripts/dns.py %s"' % dockName)
+        #     run('vagrant ssh --command "python /vagrant/scripts/dns.py %s"' % dockName)
 
-            # f = open('','w')
-            # f.write('')
-            # f.close()
+        #     # f = open('','w')
+        #     # f.write('')
+        #     # f.close()
 
-            #dock
+        #     #dock
+
+
+    def stop(self, args):
+
+        for id in args.configuration:
+            self.dockyard.stop(id)
+
 
 class DockerCommandInterpreter(CommandInterpreter):
     """ Command interpreter for Docker related tasks """
@@ -110,4 +121,24 @@ class DockerCommandInterpreter(CommandInterpreter):
         elif args.action == 'kill':
             for container in args.container:
                 self.docker.kill(container)
-        
+
+
+class DockyardCommandInterpreter(CommandInterpreter):
+    """ Command interpreter for Docker related tasks """
+
+    def init(self, args):
+        self.dockyard.init()
+
+    def list(self, args):
+        self.dockyard.list()
+
+    def start(self, args):
+        for dockyardName in args.dockyard:
+            self.dockyard.start(dockyardName)
+
+    def stop(self, args):
+        for dockyardName in args.dockyard:
+            self.dockyard.stop(dockyardName)
+
+
+

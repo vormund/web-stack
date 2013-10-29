@@ -1,11 +1,11 @@
 {
-    "docks": {
+    "dockyard": {
         "web": {
             "domain": "webstack.com",
-            "images": [
+            "image": [
                 {
                     "image": "rhq",
-                    "ports": [
+                    "port": [
                         {
                             "private":"22",
                             "public":"2200"
@@ -19,7 +19,7 @@
                 },
                 {
                     "image": "apache2",
-                    "ports": [
+                    "port": [
                         {
                             "private":"22",
                             "public":"2201"
@@ -42,7 +42,7 @@
                 },
                 {
                     "image": "postgres",
-                    "ports": [
+                    "port": [
                         {
                             "private":"22",
                             "public":"2202"
@@ -61,7 +61,7 @@
                 {    
                     "image": "wildfly",
                     "instances": 5,
-                    "ports": [
+                    "port": [
                         {
                             "private":"22",
                             "public":"2205"
