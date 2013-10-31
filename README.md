@@ -47,4 +47,10 @@ Getting Going
 
     This command will setup a Ubuntu flavored Vagrant box, install Docker, and setup docker containers for all of our services.
 
-6. More to come soon!!
+6. Start Dockyard configuration
+
+        $ python webstack.py dockyard start webstack
+
+    This command will start docker containers for Apache2, Wildfly & PostgreSQL
+
+7. More soon!!

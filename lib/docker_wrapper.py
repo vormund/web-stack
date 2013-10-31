@@ -1,5 +1,6 @@
 from util import run
 import os, shutil
+from dict2table import *
 
 class DockerWrapper(object):
     """ Small wrapper around Docker """
@@ -25,16 +26,36 @@ class DockerWrapper(object):
 
         run('vagrant ssh --command "cd %s/%s && docker build -t=\"%s\" ."' % (self.baseDir, docker, docker), cwd="docker/%s" % docker)
 
-    def ps(self):
+    def listContainers(self):
         headers = ['Image', 'Id', 'Status', 'Command']
         print format_as_table(self.client.containers(), headers, headers)
 
-    def run(self, image):
-        containerInfo = self.client.create_container(image, None)
-        self.client.start(containerInfo['Id'])
-        print "Image [%s] started, container=%s." % (image, containerInfo['Id'])
+    def runByName(self, name):
+        containerInfo = self.client.create_container(name, None)
+        self.startContainerById(containerInfo['Id'])
 
-    def kill(self, containerId):
+        return containerInfo['Id']
+
+    def runByConfiguration(self, configuration):
+        
+        #c.create_container(image, command=None, hostname=None, user=None, 
+        #detach=False,stdin_open=False, tty=False, mem_limit=0, ports=None, environment=None,
+        #dns=None,volumes=None, volumes_from=None, privileged=False)
+
+        containerInfo = self.client.create_container(configuration.getName(), None, dns=configuration.getDns(), volumes=configuration.getVolumes())
+        self.startContainerById(containerInfo['Id'])
+
+        return containerInfo['Id']
+
+    def startContainerById(self, containerId):
+
+        self.client.start(containerId)
+
+        name = self.client.inspect_container(containerId)['Config']['Image']
+        print "Image [%s] started, container=%s." % (name, containerId)
+
+
+    def killContainerById(self, containerId):
         if containerId == 'all':
             containers = self.client.containers()     
         else:
@@ -47,7 +68,7 @@ class DockerWrapper(object):
             except:
                 print "Failed killing [%s] container." % containerInfo['Id']
 
-    def removeImage(self, imageId):
+    def removeImageById(self, imageId):
         if imageId == 'all':
             images = self.client.images()     
         else:
@@ -58,5 +79,7 @@ class DockerWrapper(object):
                 self.client.remove_image(imageInfo['Id'])
                 print "Image [%s] removed." % imageInfo['Id']
             except:
-                print "Failed removing [%s] image." % imageInfo['Id']            
+                print "Failed removing [%s] image." % imageInfo['Id'] 
+
+        
             

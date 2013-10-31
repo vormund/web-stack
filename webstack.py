@@ -1,5 +1,5 @@
 #!/usr/bin/python
-import argparse, sys
+import argparse, sys, json
 import docker
 from lib import *
 
@@ -23,6 +23,7 @@ rootParser = NoArgHelpParser(description='''Web-Stack Common Operation Helper'''
 moduleSubparsers = rootParser.add_subparsers(dest='module', help='_')
 stackParser = moduleSubparsers.add_parser('stack', help='Stack related commands, can combine vagrant + docker commands into a single command')
 dockerParser = moduleSubparsers.add_parser('docker', help='Execute Docker related tasks from the host')
+dockyardParser = moduleSubparsers.add_parser('dockyard', help='Dockyard related operations')
 
 ## Module - Vagrant
 # vagrantParser = moduleSubparsers.add_parser('vagrant', help='Vagrant related tasks')
@@ -71,7 +72,22 @@ parser = dockerSubparsers.add_parser('container', help='Container operations')
 subparser = parser.add_subparsers(dest='action', help='Container operations')
 parser = subparser.add_parser('list', help='List container(s)')
 parser = subparser.add_parser('kill', help='Kill container(s)')
-parser.add_argument('image', type=str, nargs='+', help='Image name, \'all\' for all')
+parser.add_argument('hash', type=str, nargs='+', help='Container hash, \'all\' for all')
+
+## Module - Dockyard
+dockyardSubparsers = dockyardParser.add_subparsers(dest='operation', help='Docker operations help')
+
+parser = dockyardSubparsers.add_parser('init', help='Initialize Dockyard')
+parser = dockyardSubparsers.add_parser('list', help='List active Dockyards')
+
+# Dockyard - start
+parser = dockyardSubparsers.add_parser('start', help='Start dockyard(s)')
+parser.add_argument('dockyard', type=str, nargs='+', help='Dockyard container names')
+
+# Dockyard - stop
+parser = dockyardSubparsers.add_parser('stop', help='Stop dockyard(s)')
+parser.add_argument('dockyard', type=str, nargs='+', help='Dockyard name or id')
+
 # parser = subparser.add_parser('restart', help='Restart a running container')
 # parser = subparser.add_parser('stop', help='Stop a running container')
 # parser = subparser.add_parser('top', help='Lookup the running processes of a container')
@@ -105,9 +121,12 @@ if not commandInterpreter:
     print "Unable to find a command interpreter for [%s]" % args.module
     sys.exit(1)
 
-# Execute
+# Inject Dependencies
+dockyardConfig = json.load(open('dockyard.json'))
+dockerWrapper = DockerWrapper(client=docker.Client(base_url=DOCKER_URL, version=DOCKER_API_VERSION))
 commandInterpreter = commandInterpreter( \
     vagrant=VagrantWrapper(), \
-    docker=DockerWrapper(client=docker.Client(base_url=DOCKER_URL, version=DOCKER_API_VERSION)))
+    docker=dockerWrapper, \
+    dockyard=Dockyard(dockyardConfig=dockyardConfig, docker=dockerWrapper, dockerImageFactory=DockerImageFactory(defaults=dockyardConfig['default'])) )
 commandInterpreter.execute(args)
 

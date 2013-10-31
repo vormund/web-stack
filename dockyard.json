@@ -1,0 +1,42 @@
+{
+    "default": {
+        "dns": [
+            "172.17.42.1",
+            "8.8.8.8",
+            "8.8.4.4"
+        ]
+    },
+    "dockyard": {
+        "webstack": {
+            "domain": "webstack.com",
+            "image": [
+                {
+                    "image": "apache2"
+                },
+                {
+                    "image": "postgres"
+                },
+                {    
+                    "image": "wildfly"
+                }
+            ]
+        },
+        "webstack-cluster": {
+            "domain": "webstack.com",
+            "image": [
+                {
+                    "image": "apache2"
+                },
+                {
+                    "image": "postgres"
+                },
+                {    
+                    "image": "wildfly",
+                    "instances": 5
+                }
+            ]
+        },        
+        "jenkins": {},
+        "docker": {}
+    }
+}
