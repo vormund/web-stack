@@ -15,10 +15,16 @@ def curs2dict(cursor):
 class Dockyard(object):
     
     conn = None
+    dockyardConfig = None
+    dockerImageFactory = None
+    docker = None
 
-    def __init__(self):
+    def __init__(self, docker=None, dockyardConfig=None, dockerImageFactory=None):
         self.connect()
-
+        self.dockyardConfig = dockyardConfig
+        self.dockerImageFactory = dockerImageFactory
+        self.docker = docker
+        
     def connect(self):
         self.conn = sqlite3.connect('dockyard.db')
 
@@ -35,7 +41,7 @@ class Dockyard(object):
                      ( id INTEGER PRIMARY KEY, identifier TEXT)''')
 
         # Table to keep track of each dockyard's dockers
-        cursor.execute('''CREATE TABLE dockyard_dockers
+        cursor.execute('''CREATE TABLE active_dockyard_containers
                      ( id INTEGER PRIMARY KEY, dockyard_id INTEGER, image_name TEXT, hash TEXT)''')
 
     def list(self):
@@ -45,7 +51,7 @@ class Dockyard(object):
         activeDockyardsDict = curs2dict(activeDockyardsCursor)
         for activeDockyard in activeDockyardsDict:
 
-            dockyardDockersCursor = self.conn.cursor().execute('SELECT * FROM dockyard_dockers WHERE dockyard_id = ?', (activeDockyard['id'],))
+            dockyardDockersCursor = self.conn.cursor().execute('SELECT * FROM active_dockyard_containers WHERE dockyard_id = ?', (activeDockyard['id'],))
             dockerHeaders = [d[0].lower() for d in dockyardDockersCursor.description]
             dockerAsciiTable = format_as_table(curs2dict(dockyardDockersCursor), dockerHeaders, dockerHeaders)
             dockerAsciiTable = "\n" + re.sub(re.compile('^', re.MULTILINE), '\t\1', dockerAsciiTable)
@@ -57,29 +63,27 @@ class Dockyard(object):
 
 
     def start(self, dockyardName):
-        dockyardConfigs = json.load(open('dockyard.json'))
-
         print "Assembling [%s] dockyard" % dockyardName
 
         cursor = self.conn.cursor()
         cursor.execute('''INSERT INTO active_dockyards values (NULL,?)''', (dockyardName,))
         rowId = cursor.lastrowid
 
-        for imageConfig in dockyardConfigs['dockyard'][dockyardName]['image']:
-            cursor.execute('''INSERT INTO dockyard_dockers VALUES (NULL, ?, ?, ?)''', (rowId, imageConfig['image'], 'hash'))
-            #print image
+        for imageConfig in self.dockyardConfig['dockyard'][dockyardName]['image']:
+            
+            dockerImage = self.dockerImageFactory.imageFromConfig(imageConfig)
+
+            for i in range(0, dockerImage.getInstances()):
+                containerId = self.docker.runByConfiguration(dockerImage)
+                cursor.execute('''INSERT INTO active_dockyard_containers VALUES (NULL, ?, ?, ?)''', (rowId, imageConfig['image'], containerId))
 
         self.conn.commit()
 
 
 
-        for dockyardConfig in dockyardConfigs['dockyard'][dockyardName]:
-            #print dockyardConfig
-            pass
-
-
     def stop(self, identifier):
 
+        # Lookup the dockyard from identified
         try:
             id = int(identifier)
             cursor = self.conn.cursor().execute('SELECT * FROM active_dockyards WHERE id = ?', (id,))
@@ -94,12 +98,19 @@ class Dockyard(object):
             if row:
                 print "Disassembling [%(id)s:%(identifier)s] dockyard" % row
                 
+                # Kill the containers
+                cursor = self.conn.cursor().execute('SELECT * FROM active_dockyard_containers WHERE dockyard_id = ?', (row['id'],))
+                for container in curs2dict(cursor):
+                    self.docker.killContainerById(container['hash'])
+
+                # Delete container references
                 rowsAffected = 0
-                cursor = self.conn.cursor().execute('DELETE FROM active_dockyards WHERE id = ?', (row['id'],))
-                rowsAffected = rowsAffected + cursor.rowcount
+                cursor = self.conn.cursor().execute('DELETE FROM active_dockyard_containers WHERE dockyard_id = ?', (row['id'],))
+                rowsAffected = rowsAffected + cursor.rowcount                
                 
-                cursor = self.conn.cursor().execute('DELETE FROM dockyard_dockers WHERE dockyard_id = ?', (row['id'],))
-                rowsAffected = rowsAffected + cursor.rowcount
+                # Delete the dockyard reference                
+                cursor = self.conn.cursor().execute('DELETE FROM active_dockyards WHERE id = ?', (row['id'],))
+                rowsAffected = rowsAffected + cursor.rowcount                
                 
                 print "%d rows affected." % rowsAffected
                 self.conn.commit()

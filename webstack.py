@@ -1,5 +1,5 @@
 #!/usr/bin/python
-import argparse, sys
+import argparse, sys, json
 import docker
 from lib import *
 
@@ -72,7 +72,7 @@ parser = dockerSubparsers.add_parser('container', help='Container operations')
 subparser = parser.add_subparsers(dest='action', help='Container operations')
 parser = subparser.add_parser('list', help='List container(s)')
 parser = subparser.add_parser('kill', help='Kill container(s)')
-parser.add_argument('image', type=str, nargs='+', help='Image name, \'all\' for all')
+parser.add_argument('hash', type=str, nargs='+', help='Container hash, \'all\' for all')
 
 ## Module - Dockyard
 dockyardSubparsers = dockyardParser.add_subparsers(dest='operation', help='Docker operations help')
@@ -121,10 +121,12 @@ if not commandInterpreter:
     print "Unable to find a command interpreter for [%s]" % args.module
     sys.exit(1)
 
-# Execute
+# Inject Dependencies
+dockyardConfig = json.load(open('dockyard.json'))
+dockerWrapper = DockerWrapper(client=docker.Client(base_url=DOCKER_URL, version=DOCKER_API_VERSION))
 commandInterpreter = commandInterpreter( \
     vagrant=VagrantWrapper(), \
-    docker=DockerWrapper(client=docker.Client(base_url=DOCKER_URL, version=DOCKER_API_VERSION)), \
-    dockyard=Dockyard())
+    docker=dockerWrapper, \
+    dockyard=Dockyard(dockyardConfig=dockyardConfig, docker=dockerWrapper, dockerImageFactory=DockerImageFactory(defaults=dockyardConfig['default'])) )
 commandInterpreter.execute(args)
 

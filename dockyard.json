@@ -1,85 +1,41 @@
 {
+    "default": {
+        "dns": [
+            "172.17.42.1",
+            "8.8.8.8",
+            "8.8.4.4"
+        ]
+    },
     "dockyard": {
-        "web": {
+        "webstack": {
             "domain": "webstack.com",
             "image": [
                 {
-                    "image": "rhq",
-                    "port": [
-                        {
-                            "private":"22",
-                            "public":"2200"
-                        }
-                    ],
-                    "dns": [
-                        "172.17.42.1",
-                        "8.8.8.8",
-                        "8.8.4.4"
-                    ]
+                    "image": "apache2"
                 },
                 {
-                    "image": "apache2",
-                    "port": [
-                        {
-                            "private":"22",
-                            "public":"2201"
-                        },
-                        {
-                            "private":"80",
-                            "public":"80"
-                        },
-                        {
-                            "private":"443",
-                            "public":"443"
-                        }
-
-                    ],
-                    "dns": [
-                        "172.17.42.1",
-                        "8.8.8.8",
-                        "8.8.4.4"
-                    ]
+                    "image": "postgres"
+                },
+                {    
+                    "image": "wildfly"
+                }
+            ]
+        },
+        "webstack-cluster": {
+            "domain": "webstack.com",
+            "image": [
+                {
+                    "image": "apache2"
                 },
                 {
-                    "image": "postgres",
-                    "port": [
-                        {
-                            "private":"22",
-                            "public":"2202"
-                        },                    
-                        {
-                            "private":"5432",
-                            "public":"5432"
-                        }
-                    ],
-                    "dns": [
-                        "172.17.42.1",
-                        "8.8.8.8",
-                        "8.8.4.4"
-                    ]
+                    "image": "postgres"
                 },
                 {    
                     "image": "wildfly",
-                    "instances": 5,
-                    "port": [
-                        {
-                            "private":"22",
-                            "public":"2205"
-                        },
-                        {
-                            "private":"8080",
-                            "public":"8080"
-                        }
-                    ],
-                    "dns": [
-                        "172.17.42.1",
-                        "8.8.8.8",
-                        "8.8.4.4"
-                    ]                    
+                    "instances": 5
                 }
-
             ]
-        },
+        },        
         "jenkins": {},
         "docker": {}
     }

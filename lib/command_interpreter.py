@@ -107,20 +107,20 @@ class DockerCommandInterpreter(CommandInterpreter):
 
         elif args.action == 'remove':
             for image in args.image:
-                self.docker.removeImage(image)
+                self.docker.removeImageById(image)
 
         elif args.action == 'run':
-            for image in args.image:
-                self.docker.run(image)
+            for name in args.image:
+                self.docker.runByName(name)
 
     def container(self, args):
         if args.action == 'list':
             #self.docker.containers()
-            self.docker.ps()
+            self.docker.listContainers()
 
         elif args.action == 'kill':
-            for container in args.container:
-                self.docker.kill(container)
+            for hash in args.hash:
+                self.docker.killContainerById(hash)
 
 
 class DockyardCommandInterpreter(CommandInterpreter):
