@@ -42,7 +42,7 @@ class StackCommandInterpreter(CommandInterpreter):
         # Get a list of the docker containers we have built already
         dockerDirs = filter(lambda x: os.path.isdir('docker/' + x), os.listdir('docker'))
         imagesBuilt = [] 
-        for imageInfo in self.docker.client.images():
+        for imageInfo in self.docker.dockerClient.images():
             imagesBuilt.append(imageInfo['Repository'])
 
         # Build docker containers
