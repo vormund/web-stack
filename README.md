@@ -35,7 +35,7 @@ Getting Going
 
 1. Download & install [lastest version of VirtualBox](https://www.virtualbox.org/)
 2. Download & install [lastest version of Vagrant](http://downloads.vagrantup.com/)
-3. Download & install Python 2.7 (Standard with OSX 10.7+)
+3. Download & install [Python 2.7](http://www.python.org/download/releases/2.7/) (Standard with OSX 10.7+)
 4. Download & Install [latest version of SetupTools](https://pypi.python.org/pypi/setuptools)
         
         $ sudo python setup.py install    
