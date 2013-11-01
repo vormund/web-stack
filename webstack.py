@@ -15,6 +15,11 @@ class NoArgHelpParser(argparse.ArgumentParser):
         self.print_help()
         sys.exit(2)            
 
+# Setup temp directory
+try:
+    os.mkdir('temp')
+except OSError:
+    pass
 
 ### Parse command-line arguments
 rootParser = NoArgHelpParser(description='''Web-Stack Common Operation Helper''',)
@@ -123,10 +128,13 @@ if not commandInterpreter:
 
 # Inject Dependencies
 dockyardConfig = json.load(open('dockyard.json'))
-dockerWrapper = DockerWrapper(client=docker.Client(base_url=DOCKER_URL, version=DOCKER_API_VERSION))
+dockerClient = docker.Client(base_url=DOCKER_URL, version=DOCKER_API_VERSION)
+dockerWrapper = DockerWrapper(dockerClient=dockerClient)
 commandInterpreter = commandInterpreter( \
     vagrant=VagrantWrapper(), \
     docker=dockerWrapper, \
-    dockyard=Dockyard(dockyardConfig=dockyardConfig, docker=dockerWrapper, dockerImageFactory=DockerImageFactory(defaults=dockyardConfig['default'])) )
+    dockyard=Dockyard(dockyardConfig=dockyardConfig, docker=dockerWrapper, dockerImageFactory=DockerImageFactory(defaults=dockyardConfig['default'])),
+    dns=Dns(dockerClient=dockerClient) 
+)
 commandInterpreter.execute(args)
 

@@ -69,13 +69,13 @@ class Dockyard(object):
         cursor.execute('''INSERT INTO active_dockyards values (NULL,?)''', (dockyardName,))
         rowId = cursor.lastrowid
 
-        for imageConfig in self.dockyardConfig['dockyard'][dockyardName]['image']:
+        for containerConfig in self.dockyardConfig['dockyards'][dockyardName]['containers']:
             
-            dockerImage = self.dockerImageFactory.imageFromConfig(imageConfig)
+            dockerImage = self.dockerImageFactory.imageFromConfig(containerConfig)
 
             for i in range(0, dockerImage.getInstances()):
                 containerId = self.docker.runByConfiguration(dockerImage)
-                cursor.execute('''INSERT INTO active_dockyard_containers VALUES (NULL, ?, ?, ?)''', (rowId, imageConfig['image'], containerId))
+                cursor.execute('''INSERT INTO active_dockyard_containers VALUES (NULL, ?, ?, ?)''', (rowId, containerConfig['image'], containerId))
 
         self.conn.commit()
 

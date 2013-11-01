@@ -6,11 +6,13 @@ class CommandInterpreter(object):
     vagrant = None
     docker = None
     dockYard = None
+    dns = None
 
-    def __init__(self, vagrant=None, docker=None, dockyard=None):
+    def __init__(self, vagrant=None, docker=None, dockyard=None, dns=None):
         self.vagrant = vagrant
         self.docker = docker
         self.dockyard = dockyard
+        self.dns = dns
 
     def execute(self, args):
         """ Execute command via reflection """
@@ -135,10 +137,12 @@ class DockyardCommandInterpreter(CommandInterpreter):
     def start(self, args):
         for dockyardName in args.dockyard:
             self.dockyard.start(dockyardName)
+            self.dns.configure(dockyardName)
 
     def stop(self, args):
         for dockyardName in args.dockyard:
             self.dockyard.stop(dockyardName)
+            self.dns.configure(dockyardName)
 
 
 

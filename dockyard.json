@@ -6,10 +6,10 @@
             "8.8.4.4"
         ]
     },
-    "dockyard": {
+    "dockyards": {
         "webstack": {
             "domain": "webstack.com",
-            "image": [
+            "containers": [
                 {
                     "image": "apache2"
                 },
@@ -23,7 +23,7 @@
         },
         "webstack-cluster": {
             "domain": "webstack.com",
-            "image": [
+            "containers": [
                 {
                     "image": "apache2"
                 },

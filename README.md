@@ -35,7 +35,7 @@ Getting Going
 
 1. Download & install [lastest version of VirtualBox](https://www.virtualbox.org/)
 2. Download & install [lastest version of Vagrant](http://downloads.vagrantup.com/)
-3. Download & install Python 2.7 (Standard with OSX)
+3. Download & install Python 2.7 (Standard with OSX 10.7+)
 4. Download & Install [latest version of SetupTools](https://pypi.python.org/pypi/setuptools)
         
         $ sudo python setup.py install    
@@ -45,12 +45,14 @@ Getting Going
 
         $ python webstack.py stack up
 
-    This command will setup a Ubuntu flavored Vagrant box, install Docker, and setup docker containers for all of our services.
+    This command will setup a Ubuntu flavored Vagrant box, install Docker, and setup docker images for all of our services.
 
 6. Start Dockyard configuration
 
         $ python webstack.py dockyard start webstack
 
-    This command will start docker containers for Apache2, Wildfly & PostgreSQL
+    Configured by /dockyard.json:
+        1. This command will start docker containers from our Apache2, Wildfly & PostgreSQL images
+        2. Configure DNS so other containers can reference each other
 
 7. More soon!!
