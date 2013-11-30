@@ -1,42 +1,83 @@
 {
-    "default": {
+    "domain": {
+        "tld": "webstack.com",
         "dns": [
             "172.17.42.1",
             "8.8.8.8",
             "8.8.4.4"
-        ]
-    },
-    "dockyards": {
-        "webstack": {
-            "domain": "webstack.com",
-            "containers": [
-                {
-                    "image": "apache2"
-                },
-                {
-                    "image": "postgres"
-                },
-                {    
-                    "image": "wildfly"
-                }
-            ]
-        },
-        "webstack-cluster": {
-            "domain": "webstack.com",
-            "containers": [
-                {
-                    "image": "apache2"
-                },
-                {
-                    "image": "postgres"
-                },
-                {    
-                    "image": "wildfly",
-                    "instances": 5
-                }
-            ]
-        },        
-        "jenkins": {},
-        "docker": {}
+        ],
+        "dockyards": {
+            "wildfly-cluster": {
+                "containers": [
+                    {    
+                        "image": "wildfly",
+                        "instances": 5
+                    }
+                ],
+                "requires": [
+                    "mysql",
+                    "apache2"
+                ]
+            },
+            "wildfly-single": {
+                "containers": [
+                    {    
+                        "image": "wildfly"
+                    }
+                ],
+                "requires": [
+                    "mysql",
+                    "apache2"
+                ]
+            },
+            "apache2": {
+                "containers": [
+                    {
+                        "image": "apache2"
+                    }
+                ]
+            },
+            "phpmyadmin": {
+                "containers": [
+                    {    
+                        "image": "php"
+                    }
+                ],
+                "requires": [
+                    "mysql"
+                ]
+            },            
+            "mysql": {
+                "containers": [
+                    {    
+                        "image": "mysql"
+                    }
+                ]
+            },        
+            "postgres": {
+                "containers": [
+                    {    
+                        "image": "jenkins"
+                    }
+                ]
+            },        
+            "jenkins": {
+                "containers": [
+                    {    
+                        "image": "jenkins"
+                    }
+                ]
+            },
+            "rhq": {
+                "containers": [
+                    {    
+                        "image": "jenkins"
+                    }
+                ],
+                "requires": [
+                    "mysql"
+                ]
+            }
+        }
     }
 }
