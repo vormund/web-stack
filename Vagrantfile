@@ -45,7 +45,7 @@ Vagrant::Config.run do |config|
     
     # Setup Docker, open API interface on all interfaces
     pkg_cmd << "adduser vagrant docker;"
-    pkg_cmd << "sed -i -e \"s,/usr/bin/docker -d,/usr/bin/docker -d -H 0.0.0.0:5555 -H unix:///var/run/docker.sock,g\" /etc/init/docker.conf;"
+    pkg_cmd << "echo \"DOCKER_OPTS='-D -H=tcp://0.0.0.0:5555 -H=unix:///var/run/docker.sock'\n\" > /etc/default/docker;"
 
     # Add guest additions if local vbox VM. As virtualbox is the default provider,
     # it is assumed it won't be explicitly stated.

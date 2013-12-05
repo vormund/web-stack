@@ -1,5 +1,7 @@
 import dockyard
 
-
 cli = dockyard.Cli()
-cli.add
+cli.addPlugin(dockyard.DockerPlugin())
+cli.addPlugin(dockyard.DockyardPlugin())
+cli.addPlugin(dockyard.StackPlugin())
+cli.parse()
