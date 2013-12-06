@@ -1,3 +1,4 @@
+#!/usr/bin/python
 import dockyard
 
 cli = dockyard.Cli()
